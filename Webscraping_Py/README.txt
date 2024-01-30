@@ -1,3 +1,13 @@
+Notes for Darryl:
+    The tree.txt file is the generated skill tree in a readable text file and shows the structure of the skills
+
+    The file you can use is called Main_nosave since I modified it so it doesn't save the HTML file to your computer
+    The main function to be replaced is called find_cheapest_tree(), with the driver code being at the bottom
+
+
+
+
+TBD:
 need to several catagories:
 -> personality, clan, religion
 -> only 1 personality, religion, clan etc.
