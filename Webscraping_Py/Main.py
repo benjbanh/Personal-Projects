@@ -2,7 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import os.path
-
+from itertools import combinations
+import time
+from collections import defaultdict
 """
     NOTES:
 
@@ -39,7 +41,7 @@ trait_dict = {
     }
 
 priority_list = ["dominance","damage","stamina","defense","stamina recovery","defense recovery","wealth","speed","health","glory",]
-
+nlist = []
 class TreeNode:
     def __init__(self, name, req, trait, score=0, depth=0):
         self.children = []
@@ -112,22 +114,8 @@ def add_node(root, new_node, list=None):
         else:
             print(f" x  \"{new_node.req[1]}\" not found.")
 
-# get size from trait list
-def count_nodes(root):
-    if root is None:
-        return 0
-    
-    # Initialize the count with 1 for the current node
-    count = 1
-    
-    # Recursively count nodes in each child
-    for child in root.children:
-        count += count_nodes(child)
-    
-    return count
-
 def assign_num(root):
-    """Assigns num and depth to all nodes in a tree"""
+    """Assigns num and depth to all nodes in a tree and returns tree size"""
     if root is None:
         return 0
 
@@ -145,6 +133,7 @@ def assign_num(root):
             node.num = count
             node.depth = depth
             count += 1
+            nlist.append(node)
             
             for child in node.children:
                 queue.append(child)
@@ -153,12 +142,14 @@ def assign_num(root):
 
 
 # gives score to all nodes with the higher score indicating better placement(change to lower)
-def score_nodes(trait_dict):
+def score_nodes(trait_dict,size):
     priority_weight = 0.5
     rank_weight = 0.4
     level_weight = 0.1
     max_score = 105
     modifier = 5
+
+    score_list = [0]*size
 
     for trait in trait_dict:
         lst = trait_dict.get(trait)
@@ -203,6 +194,7 @@ def score_nodes(trait_dict):
             #     skill.score = max_score - int(round(float(score_val) * 10,0))
             
             skill.score = max_score - int(round(float(score_val) * 10,0))
+            score_list[skill.num] = skill.score
 
             # print statements
             # print(f"P:{modifier} * {(len(priority_list) - priority_list.index(trait))}/{len(priority_list)} = {priority_val}") #priority
@@ -210,13 +202,7 @@ def score_nodes(trait_dict):
             # print(f"L:{modifier} - {(modifier/4)} * {(int(level_val)//4)} = {level_val}") #level
             # print(f"{skill.name}[{100-skill.score}] = ({priority_weight} * {priority_val}) + ({rank_weight} * {rank_val}) + ({level_weight} * {level_val})")
         # print("\n")
-
-def primary_sort(list):
-    for node in list:
-        if len(node.req) == 1:
-            list.remove(node)
-            list.insert(0,node)  
-
+    return score_list
 
 ###############################################################################################
 #                                   TRAIT LIST FUNCTIONS
@@ -301,11 +287,62 @@ def find_path(root, target_name, list):
     list.pop(-1)
     return None
 
+def translate_to_graph(root):
+    if root is None:
+        return
+
+    queue = []
+    queue.append((root, None))  # Storing (node, parent) tuples
+
+    adj_list = defaultdict(list)
+
+    while queue:
+        node, parent = queue.pop(0)
+        
+        if parent:
+            adj_list[parent.num].append(node.num)
+            # adj_list[node.name].append(parent.name) #appends parent to adjlist
+
+        for child in node.children:
+            queue.append((child, node))  # Pass the child node and its parent
+
+    # for node, neighbors in adj_list.items():
+    #     print(f"({node}): {neighbors}")
+    return adj_list
+
+def dp(graph, score_list,size, k):
+    """
+    correct but made to find max score, cat_nodes only sometimes included
+    need to add discrimination
+    """
+    N = k       #number of classes you can take
+    M = size       #total number of classes
+    children = graph
+    power = score_list
+
+    # Initialize a 2D array to store the maximum value and the selected nodes
+    dp = [[(0, []) for _ in range(N+1)] for _ in range(M)]
+    def dfs(node):
+        dp[node][1] = (power[node], [node]) 
+        for child in children[node]:
+            dfs(child)
+            for i in range(N, 0, -1):
+                for j in range(i):
+                    value = dp[node][i-j][0] + dp[child][j][0]
+                    nodes = dp[node][i-j][1] + dp[child][j][1]
+                    if value > dp[node][i][0]: #discriminate here
+                        dp[node][i] = (value, nodes)
+    dfs(0)
+    # for row in dp:
+    #     print(row)
+    return dp[0][N]
+            
 ###############################################################################################
 #                                  OPTIMIZATION FUNCTIONS
 ###############################################################################################
 """
-    can make code more efficient by filtering if it list has all cat_
+    X| need to ensure first node has depth of 3,
+     | need to skip 2nd node if 1st node req isnt there
 """
 def find_connected_subtrees(root, k):
     def generate_subtrees(node):
@@ -314,20 +351,19 @@ def find_connected_subtrees(root, k):
 
         subtrees = []
         
-        # base + 6 cat_s
-        if k == 1:
+        if k == 0:
             return root
         
         # Explore all combinations of nodes starting from the current node
         for combo in get_combos(get_descendants(node, k), k):
-            if root not in combo:
-                break
+            # if combo[0].depth != 3:
+            #     continue
             subtree = list(combo)
-            subtree.pop(0)
-            if is_connected(subtree):
-                if discriminate(subtree):
-                    print([node.name for node in subtree],sum([node.score for node in subtree]))
-                    subtrees.append(subtree)
+            if is_valid(subtree):
+                # print([node.name for node in subtree])
+                subtrees.append(subtree)
+                print("o",end="")
+            print([node.name for node in subtree])
         return subtrees
 
     def get_descendants(node, k):
@@ -343,72 +379,58 @@ def find_connected_subtrees(root, k):
                 # print(f'skipped {current_node.name} @ depth{current_node.depth}')
         
         # remove root and cat_s as going to hardcode it in 
+        descendants.remove(node)
         for n in node.children:
             descendants.remove(n)
+
         return descendants
 
-    def is_connected(subtree):
-        """Checks if a list of nodes is connected through their depth and children"""
+    def is_valid(subtree):
+        """Checks if a tree is connected and valid through # of cat_s
+            Needs to make exception for freed slave
+        """
         subtree = sorted(subtree, key=lambda x: x.depth)
-        # print("values",[node.score for node in subtree])
-        # print("depths",[node.depth for node in subtree])
-        # print(sorted)
         curr_depth = 3
         depth_list = []
+        frequency_dict = dict.fromkeys(class_list, 0)
 
         # change list to start and end pointers
         if not subtree:
-            print("Nones")
             return False
         
         # ascending connected depths: 1,2,3
         for node in subtree:
+            if node.depth == 3:
+                frequency_dict[node.type] += 1
+            
             # same depth
             if curr_depth == node.depth:
                 depth_list.append(node)
 
             # new depth encountered
             elif (curr_depth +1)  == node.depth:
-                # check list to see if sorted[i] is a child of any
-                found = False
-                
-                for j in depth_list:
-                    if node in j.children:
-                        found = True
-
-                if not found:
-                    # print("False 1")
+                if not any(node in j.children for j in depth_list):
+                    print("X",end="")
                     return False
-                curr_depth +=1
-                depth_list = [node]               
+                curr_depth += 1               
             
             # disconnected node
             else:
+                print("X")
                 return False
             
-        return True
-    
-    def discriminate(li):
-        frequency_dict = dict.fromkeys(class_list, 0)
-        # Count the frequency of each number in the array
-        for n in li:
-            if n.depth == 3:
-                frequency_dict[n.type] += 1
+        if frequency_dict['cat_Religion'] != 1 or \
+            frequency_dict['cat_Clan'] != 1 or \
+            frequency_dict['cat_Personality'] != 1:
+                print("x",end="")
+                return False
         
-        if frequency_dict['cat_Religion'] != 1:
-            return False
-        if frequency_dict['cat_Clan'] != 1:
-            return False
-        if frequency_dict['cat_Personality'] != 1:
-            return False
         return True
-        
     
     def get_combos(node_list, k):
-        """combinations() but always include reqs as to increase efficiency
-            need to replace 7 nodes in indices to have base and 6 cat_s
-
-            change node.nums
+        """need to skip when encountering node with no hope of connecting
+            need to skip if
+        [0,1,2]->[0,1,3],[0,1,4]-->[0,2,3]->[0,2,4]
 
         """        
         # combinations('ABCD', 2) --> AB AC AD BC BD CD
@@ -422,15 +444,18 @@ def find_connected_subtrees(root, k):
         yield tuple(pool[i] for i in indices)
         while True:
             for i in reversed(range(k)):
-                if indices[i] != i + n - k:
+                if indices[i] != i + n - k:     #checks if end of pool
                     break
             else:
                 return
-            indices[i] += 1
+            indices[i] += 1             #magic happens here
             for j in range(i+1, k):
-                indices[j] = indices[j-1] + 1
+                indices[j] = indices[j-1] + 1   #resets when new index encountered
+
+            # check stuff here before yielding
+            
             yield tuple(pool[i] for i in indices)
-    
+
     # Explore all nodes in the tree to find connected subtrees
     return generate_subtrees(root)
 
@@ -440,7 +465,7 @@ def find_best(root, k):
     max = 100
     best = []
     best_score = []
-    k += 1
+    # k += 1
     subtrees = find_connected_subtrees(root, k)
     for subtree in subtrees:
         subtree_score = [node.score for node in subtree]
@@ -501,7 +526,9 @@ for class_name in class_list:
         add_trait(new_node)
     
     # sort the node list by req
-    primary_sort(node_list)
+    # primary_sort(node_list)
+    node_list = sorted(node_list, key=lambda x: x.depth)
+
 
     #loops unadded nodes to trees until added
     for node in node_list:
@@ -513,7 +540,14 @@ size = assign_num(head)
 for key in trait_dict:
     trait_dict[key].sort(key=lambda x: float(x.trait.split(" ", 1)[0].replace("%","")))
 
-score_nodes(trait_dict)
-print_nary_tree(head, 0, True)
+score_li = score_nodes(trait_dict,size)
+# print_nary_tree(head, 0, True)
 
-find_best(head, 4)
+start_time = time.time()
+max_value, selected_nodes = dp(translate_to_graph(head), score_li,size, 7)
+print("Selected nodes:", selected_nodes)
+print("Maximum value:",[score_li[i] for i in selected_nodes],"=", max_value)
+print("List:",[nlist[i].name for i in selected_nodes])
+
+# find_best(head, 5)
+print("--- %s seconds ---" % (time.time() - start_time))
