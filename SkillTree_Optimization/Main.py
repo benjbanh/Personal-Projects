@@ -13,7 +13,7 @@ from timeit import default_timer as timer
 
 # URL of the webpage to scrape
 url = "https://www.ifelsemedia.com/swordandglory/perklist/"
-file_path = r"C:\Users\benjb\Downloads\Webscrape.txt"
+file_path = "Saved_graph.txt"
 class_list = [
     "cat_Occupation",   
     "cat_CombatSkill",
@@ -86,14 +86,8 @@ def find_name(root, target_name):
 # Assumes all required nodes are contained in the list
 # Will recursively go forever if exception
 def add_node(root, new_node, list=None):  
-    # Adds class_name to root node 
-    if new_node.req is None:
-        root.children.append(new_node)
-        # print(f"    {root.name} -> {new_node.name}")
-        return True
-    
-    # For level 1 skills
-    elif len(new_node.req) <= 1:
+    # Cat_nodes and level 1 skills
+    if len(new_node.req) <= 1:
         root.children.append(new_node)
         # print(f"    {root.name} -> {new_node.name}")
         return True
@@ -111,19 +105,15 @@ def add_node(root, new_node, list=None):
         else:
             print(f" x  \"{new_node.req[1]}\" not found.")
 
-# get size from trait list
-def count_nodes(root):
-    if root is None:
-        return 0
+def add_to_graph(graph,new_node,,list=[]):
+    # For level 1 skills
+    if len(new_node.req) <= 1:
+        graph[0].append(new_node)
+        return True
     
-    # Initialize the count with 1 for the current node
-    count = 1
-    
-    # Recursively count nodes in each child
-    for child in root.children:
-        count += count_nodes(child)
-    
-    return count
+    # check if res[1] exists within graph
+    while True:
+        if new_node.req[1] = 
 
 def assign_num(root):
     if root is None:
@@ -377,11 +367,7 @@ def find_connected_subtrees(root, k):
                 return False
         print([node.name for node in subtree])
         return True
-    def getReqs():
-        # returns base, cat_Personality, cat_Clan, 
-        #               cat_Adventure, cat_Religion,
-        print("")
-
+    
     # Explore all nodes in the tree to find connected subtrees
     return generate_subtrees(root)
 
@@ -431,6 +417,7 @@ for class_name in class_list:
     # print(f"\nText content from class '{class_name}':")
     class_node = TreeNode(class_name, ["Level 1"], None)
     add_node(head,class_node,None)
+    print_nary_tree(head)
     for element in elements_with_class:
         # print(f"{element}")  # Use .strip() to remove leading/trailing whitespace
         name = element.find('h2').text
@@ -461,10 +448,10 @@ for key in trait_dict:
     trait_dict[key].sort(key=lambda x: float(x.trait.split(" ", 1)[0].replace("%","")))
 
 score_nodes(trait_dict)
-# print_nary_tree(head, 0, True)
+print_nary_tree(head, 0, True)
 
 # k also includes all cat_ and base(+7)
-start = timer()
-find_best(head, 3)
-end = timer()
-print(end - start,"s")
+# start = timer()
+# find_best(head, 3)
+# end = timer()
+# print(end - start,"s")
