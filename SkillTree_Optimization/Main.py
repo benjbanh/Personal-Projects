@@ -2,18 +2,17 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import os.path
-from itertools import combinations
-from timeit import default_timer as timer
-
+from itertools import product
+import time
+from collections import defaultdict
 """
-    Need to find all subtrees of k size that contain the root node
-        k=(7+level)
-    then evaluate every tree and return the tree with the smallest value
+    NOTES:
+
 """
 
 # URL of the webpage to scrape
 url = "https://www.ifelsemedia.com/swordandglory/perklist/"
-file_path = "Saved_graph.txt"
+file_path = r"C:\Users\benjb\Downloads\Webscrape.txt"
 class_list = [
     "cat_Occupation",   
     "cat_CombatSkill",
@@ -42,7 +41,7 @@ trait_dict = {
     }
 
 priority_list = ["dominance","damage","stamina","defense","stamina recovery","defense recovery","wealth","speed","health","glory",]
-
+nlist = []
 class TreeNode:
     def __init__(self, name, req, trait, score=0, depth=0):
         self.children = []
@@ -50,8 +49,9 @@ class TreeNode:
         self.req = req
         self.trait = trait
         self.score = score
-        self.num = 0
-        self.depth = depth
+        self.num = 0        #assigns num in bfs order in assign_num
+        self.depth = depth  #dept of node
+        self.type = None    #lv 1 nodes's parent(aka cat_ node it came from)
 
     def copy_childless(self):
         return TreeNode(self.name, self.req, self.trait, self.score)
@@ -86,9 +86,22 @@ def find_name(root, target_name):
 # Assumes all required nodes are contained in the list
 # Will recursively go forever if exception
 def add_node(root, new_node, list=None):  
-    # Cat_nodes and level 1 skills
-    if len(new_node.req) <= 1:
+    # Adds class_name to root node 
+    if new_node.req is None:
         root.children.append(new_node)
+
+        # remove from "adventure", "freed slave", "occupation, "combat skill"
+        exceptions = ["cat_Adventure", "cat_Occupation", "cat_CombatSkill"]
+        if not any(new_node.name ==  i for i in exceptions):
+            new_node.type = new_node.name
+        # print(f"    {root.name} -> {new_node.name}")
+        return True
+    
+    # For level 1 skills
+    elif len(new_node.req) <= 1:
+        root.children.append(new_node)
+        if new_node.name != "Freed Slave":
+            new_node.type = root.type
         # print(f"    {root.name} -> {new_node.name}")
         return True
 
@@ -97,6 +110,7 @@ def add_node(root, new_node, list=None):
     if parent_node:
         # print(f"    {parent_node.name} -> {new_node.name}")
         parent_node.children.append(new_node)
+        # new_node.type = parent_node.type
         return True
     else:
         # print(f" x  \"{new_node.req[1]}\" not found.")
@@ -105,17 +119,8 @@ def add_node(root, new_node, list=None):
         else:
             print(f" x  \"{new_node.req[1]}\" not found.")
 
-def add_to_graph(graph,new_node,,list=[]):
-    # For level 1 skills
-    if len(new_node.req) <= 1:
-        graph[0].append(new_node)
-        return True
-    
-    # check if res[1] exists within graph
-    while True:
-        if new_node.req[1] = 
-
 def assign_num(root):
+    """Assigns num and depth to all nodes in a tree and returns tree size"""
     if root is None:
         return 0
 
@@ -133,6 +138,7 @@ def assign_num(root):
             node.num = count
             node.depth = depth
             count += 1
+            nlist.append(node)
             
             for child in node.children:
                 queue.append(child)
@@ -141,12 +147,14 @@ def assign_num(root):
 
 
 # gives score to all nodes with the higher score indicating better placement(change to lower)
-def score_nodes(trait_dict):
+def score_nodes(trait_dict,size):
     priority_weight = 0.5
     rank_weight = 0.4
     level_weight = 0.1
     max_score = 105
     modifier = 5
+
+    score_list = [0]*size
 
     for trait in trait_dict:
         lst = trait_dict.get(trait)
@@ -191,6 +199,7 @@ def score_nodes(trait_dict):
             #     skill.score = max_score - int(round(float(score_val) * 10,0))
             
             skill.score = max_score - int(round(float(score_val) * 10,0))
+            score_list[skill.num] = skill.score
 
             # print statements
             # print(f"P:{modifier} * {(len(priority_list) - priority_list.index(trait))}/{len(priority_list)} = {priority_val}") #priority
@@ -198,13 +207,7 @@ def score_nodes(trait_dict):
             # print(f"L:{modifier} - {(modifier/4)} * {(int(level_val)//4)} = {level_val}") #level
             # print(f"{skill.name}[{100-skill.score}] = ({priority_weight} * {priority_val}) + ({rank_weight} * {rank_val}) + ({level_weight} * {level_val})")
         # print("\n")
-
-def primary_sort(list):
-    for node in list:
-        if len(node.req) == 1:
-            list.remove(node)
-            list.insert(0,node)  
-
+    return score_list
 
 ###############################################################################################
 #                                   TRAIT LIST FUNCTIONS
@@ -232,25 +235,25 @@ def add_trait(node):
         trait_dict["defense"].append(node)
     else:
         # print(f"Failed {node.name}")
-        node.score = -1
+        node.score = 1
         return
 
 
 ###############################################################################################
 #                                   PRINTING FUNCTIONS
 ###############################################################################################
-def print_nary_tree(node, depth=0, showScore=False):
+def print_nary_tree(node, depth=0, show=False):
     if node:
         # Print the current node's value at the current depth
         print("    ",end="")
-        if showScore:
-            print("    " * depth + "#" + str(node.num) + " " + str(node.name) + " (" + str(node.score) + ")" "_" + str(node.depth))
+        if show:
+            print("    " * depth + "#" + str(node.num) + " " + str(node.name) + " (" + str(node.score) + ")" "_" + str(node.depth) + "-" + str(node.type))
         else: 
             print("    " * depth + str(node.name) + "_" + str(node.depth))
 
         # Recursively print the children of the current node
         for child in node.children:
-            print_nary_tree(child, depth + 1, showScore)
+            print_nary_tree(child, depth + 1, show)
 
 def print_list(list, showScores = False):
     print("List: [",end="")
@@ -289,107 +292,108 @@ def find_path(root, target_name, list):
     list.pop(-1)
     return None
 
-###############################################################################################
-#                                  OPTIMIZATION FUNCTIONS
-###############################################################################################
-"""
-    can make code more efficient by filtering if it list has all cat_
-"""
-def find_connected_subtrees(root, k):
-    def generate_subtrees(node):
-        if not node:
-            return []
+def translate_to_graph(root):
+    if root is None:
+        return
 
-        subtrees = []
+    queue = []
+    queue.append((root, None))  # Storing (node, parent) tuples
 
-        # Explore all combinations of nodes starting from the current node
-        for combo in combinations(get_descendants(node), k):
-            # need to have all cat_ s
-            if root not in combo:
-                break
-            subtree = list(combo)
-            # print([node.name for node in subtree])
-            if root in subtree:
-                if is_connected(subtree):
-                    # print([node.name for node in subtree])
-                    subtrees.append(subtree)
-        return subtrees
+    adj_list = defaultdict(list)
 
-    def get_descendants(node):
-        descendants = []
-        stack = [node]
-        while stack:
-            current_node = stack.pop()
-            # node dist from root > k: continue
-            if current_node.depth < k+3:
-                descendants.append(current_node)
-                stack.extend(child for child in current_node.children if child not in descendants)
-            else:
-                print(f'skipped {current_node.name} @ depth{current_node.depth}')
-        return descendants
+    while queue:
+        node, parent = queue.pop(0)
+        
+        if parent:
+            adj_list[parent.num].append(node.num)
+            # adj_list[node.name].append(parent.name) #appends parent to adjlist
 
-    def is_connected(subtree):
-        subtree = sorted(subtree, key=lambda x: x.depth)
-        # print("values",[node.score for node in subtree])
-        # print("depths",[node.depth for node in subtree])
-        # print(sorted)
-        curr_depth = 1
-        depth_list = []
+        for child in node.children:
+            queue.append((child, node))  # Pass the child node and its parent
 
-        # change list to start and end pointers
-        if not subtree:
-            print("Nones")
-            return False
+    # for node, neighbors in adj_list.items():
+    #     print(f"({node}): {neighbors}")
+    return adj_list
 
-        for node in subtree:
-            # ascending connected depths: 1,2,3
-            if curr_depth == node.depth:
-                depth_list.append(node)
-                
-            # new depth encountered
-            elif (curr_depth +1)  == node.depth:
-                # check list to see if sorted[i] is a child of any
-                found = False
-                
-                for j in depth_list:
-                    if node in j.children:
-                        found = True
+def find_best(graph, score_list,size, k):
+    """
+        Plan: 
+        discrimination through producing every basic type(base, all_cat_s, up to k random skills)
+        and being made immutable and adding additional skills from scaffolding
 
-                if not found:
-                    # print("False 1")
-                    return False
-                curr_depth +=1
-                depth_list = [node]               
-            
-            # disconnected node
-            else:
-                # print("False 2 ")
-                return False
-        print([node.name for node in subtree])
-        return True
+        remove attributes from "adventure", "freed slave", "occupation, "combat skill"
+    """ 
     
-    # Explore all nodes in the tree to find connected subtrees
-    return generate_subtrees(root)
+    def dp(g, score_list,size, k):
+        """
+        - correct but made to find max score
+        - cat_nodes only sometimes included
+        - need to add discrimination
+        """
 
-# helper function
-def find_best(root, k):
-    # k also includes all cat_ and base(+7)
-    max = 0
-    best = []
-    subtrees = find_connected_subtrees(root, k+7)
-    for subtree in subtrees:
-        subtree_score = [node.score for node in subtree]
-        # print(subtree_names,sum(subtree_names))
-        if sum(subtree_score) < max:
-            best = subtree_score
-            max = sum(subtree_score)
-    print("best", best)
-    print("max: ", max)
+        N = k           #number of classes you can take
+        M = size       #total number of classes
+        power = score_list
+        children = g
+        
+        # Initialize a 2D array to store the maximum value and the selected nodes
+        dp = [[(0, []) for _ in range(N+1)] for _ in range(M)]
+        def dfs(node):
+            dp[node][1] = (power[node], [node]) 
+            for child in children[node]:
+                dfs(child)
+                for i in range(N, 0, -1):
+                    for j in range(i):
+                        value = dp[node][i-j][0] + dp[child][j][0]
+                        nodes = dp[node][i-j][1] + dp[child][j][1]
+                        if value > dp[node][i][0]: #discriminate here
+                            dp[node][i] = (value, nodes)
+        dfs(0)
+        # for row in dp:
+        #     print(row)
+        return dp[0][N]
+    
+    # return all combinations of level 1 nodes and base to dp and find best one overall
+    """
+        1: cat_Occupation
+        2: cat_CombatSkill
+      X 3: cat_Religion
+        4: cat_Adventure
+      X 5: cat_Clan
+      X 6: cat_Personality
+    """
+    l = []
+    g = []
+    graph_1 = graph
+    for i in [1,2,3,4,5,6]:
+        if i == 3 or i == 5 or i == 6:
+            temp = []
+            for z in graph[i]:
+                temp.append(z)
+            g.append(temp)
+        else:
+            for z in graph[i]:
+                l.append(z)
+        graph_1.pop(i)
+        # removes node from base's children
+        graph_1[0].remove(i)
+
+    # modify to only check religion, clan, personality
+    # still ignoring combo and instead adding other skills, need to change combo to be a req
+    for combo in product(g[0], g[1], g[2]):
+        # convert num to nodes
+        # s = [nlist[i].name for i in combo]
+        # print(combo)    #180 total combinations
+        # remove all exclusive paths such as removing pagan if req is christian
+        graph_1[0] = l + list(combo)
+        max_value, selected_nodes = dp(graph_1, score_list,size, k)
+        print([nlist[i].name for i in selected_nodes] + [nlist[i].name for i in combo], max_value + sum([nlist[i].score for i in combo]))
+            
 
 ###############################################################################################
 #                                   DRIVER CODE
 ###############################################################################################
-head = TreeNode("base",["Level 1"],None)
+head = TreeNode("base",None,None)
 node_list = []
 
 if not os.path.isfile(file_path):
@@ -404,20 +408,19 @@ if os.path.getsize(file_path) == 0:
     
     # Parse the HTML content with Beautiful Soup
     soup = BeautifulSoup(response.text, "html.parser")
-    print("Read from webpage")
+    # print("Read from webpage")
 else:
     # Read from file if 
     with open(file_path, 'r', encoding='utf-8') as file:
         # Parse the HTML content of the file using Beautiful Soup
         soup = BeautifulSoup(file, 'html.parser')
-    print("Read from file")
+    # print("Read from file")
 for class_name in class_list:
     # Find all HTML elements with the specified class
     elements_with_class = soup.find_all(class_=class_name)
     # print(f"\nText content from class '{class_name}':")
-    class_node = TreeNode(class_name, ["Level 1"], None)
+    class_node = TreeNode(class_name, None, None)
     add_node(head,class_node,None)
-    print_nary_tree(head)
     for element in elements_with_class:
         # print(f"{element}")  # Use .strip() to remove leading/trailing whitespace
         name = element.find('h2').text
@@ -435,7 +438,9 @@ for class_name in class_list:
         add_trait(new_node)
     
     # sort the node list by req
-    primary_sort(node_list)
+    # primary_sort(node_list)
+    node_list = sorted(node_list, key=lambda x: x.depth)
+
 
     #loops unadded nodes to trees until added
     for node in node_list:
@@ -447,11 +452,16 @@ size = assign_num(head)
 for key in trait_dict:
     trait_dict[key].sort(key=lambda x: float(x.trait.split(" ", 1)[0].replace("%","")))
 
-score_nodes(trait_dict)
-print_nary_tree(head, 0, True)
+score_li = score_nodes(trait_dict,size)
+# print_nary_tree(head, 0, True)
 
-# k also includes all cat_ and base(+7)
-# start = timer()
-# find_best(head, 3)
-# end = timer()
-# print(end - start,"s")
+start_time = time.time()
+for i in range(1,5):
+    find_best(translate_to_graph(head), score_li,size, i)
+# max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 10,[1,2,3,4,5,6])
+# print("Selected nodes:", selected_nodes)
+# print("Maximum value:",[score_li[i] for i in selected_nodes],"=", max_value)
+# print("List:",[nlist[i].name for i in selected_nodes])
+
+# # find_best(head, 5)
+print("--- %s seconds ---" % (time.time() - start_time))
