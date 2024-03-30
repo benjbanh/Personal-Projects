@@ -318,27 +318,15 @@ def translate_to_graph(root):
     #     print(f"({node}): {neighbors}")
     return adj_list
 
-def find_best(graph, score_list,size, k):
-    """
-        Plan: 
-        discrimination through producing every basic type(base, all_cat_s, up to k random skills)
-        and being made immutable and adding additional skills from scaffolding
-
-        remove attributes from "adventure", "freed slave", "occupation, "combat skill"
-    """ 
-    
+def find_best(graph, score_list,size, k):   
     def dp(graph, score_list,size, k):
-        """
-        correct but made to find max score, cat_nodes only sometimes included
-        need to add discrimination
-        """
         N = k       #number of classes you can take
         M = size       #total number of classes
         children = graph
         power = score_list
 
         # Initialize a 2D array to store the maximum value and the selected nodes
-        dp = [[(100, []) for _ in range(N+1)] for _ in range(M)]
+        dp = [[(1000, []) for _ in range(N+1)] for _ in range(M)]
         def dfs(node):
             dp[node][1] = (power[node], [node]) 
             for child in children[node]:
@@ -350,8 +338,6 @@ def find_best(graph, score_list,size, k):
                         if value < dp[node][i][0]: #discriminate here
                             dp[node][i] = (value, nodes)
         dfs(0)
-        # for row in dp:
-        #     print(row)
         return dp[0][N]
     
     # return all combinations of level 1 nodes and base to dp and find best one overall
@@ -377,24 +363,23 @@ def find_best(graph, score_list,size, k):
         graph_1.pop(i)
         # removes node from base's children
         graph_1[0].remove(i)
+    
 
     # modify to only check religion, clan, personality
     # still ignoring combo and instead adding other skills, need to change combo to be a req
     solution = sys.maxsize
     nodes = 0
-    print([nlist[i].name for i in l])
-    print("_____________________")
+    # print([nlist[i].name for i in l])
+    # print("_____________________")
     for combo in product(g[0], g[1], g[2]):
         # convert num to nodes
         # s = [nlist[i].name for i in combo]
         # print(combo)    #180 total combinations
         # remove all exclusive paths such as removing pagan if req is christian
-        graph_1[0] = l
-        p = []
+        graph_1[0] = l.copy()
         for i in combo:
             graph_1[0] += graph[i]
-            p += graph[i]
-        # print([nlist[i].name for i in p])
+        # print([nlist[i].name for i in graph[0]])
         max_value, selected_nodes = dp(graph_1, score_list,size, k)
         print([nlist[i].name for i in selected_nodes] + [nlist[i].name for i in combo], max_value + sum([nlist[i].score for i in combo]))
         
@@ -467,16 +452,20 @@ for key in trait_dict:
     trait_dict[key].sort(key=lambda x: float(x.trait.split(" ", 1)[0].replace("%","")))
 
 score_li = score_nodes(trait_dict,size)
-print_nary_tree(head, 0, True)
+# print_nary_tree(head, 0, True)
 
 start_time = time.time()
 # for i in range(1,5):
-#     find_best(translate_to_graph(head), score_li,size, i)
-# find_best(translate_to_graph(head), score_li,size, 2)
-max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 2)
+#     max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, i)
+#     print("Selected nodes:", selected_nodes)
+#     print("Minimum value:",[score_li[i] for i in selected_nodes],"=", max_value)
+#     print("List:",[nlist[i].name for i in selected_nodes])
+#     print("-----------------------------------------------------")
+
+max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 3)
 print("Selected nodes:", selected_nodes)
 print("Minimum value:",[score_li[i] for i in selected_nodes],"=", max_value)
 print("List:",[nlist[i].name for i in selected_nodes])
+print("-----------------------------------------------------")
 
-# # find_best(head, 5)
 print("--- %s seconds ---" % (time.time() - start_time))
