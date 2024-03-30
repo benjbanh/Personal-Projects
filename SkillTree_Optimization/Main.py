@@ -5,6 +5,7 @@ import os.path
 from itertools import product
 import time
 from collections import defaultdict
+import sys
 """
     NOTES:
 
@@ -88,14 +89,16 @@ def find_name(root, target_name):
 def add_node(root, new_node, list=None):  
     # Adds class_name to root node 
     if new_node.req is None:
-        root.children.append(new_node)
-
         # remove from "adventure", "freed slave", "occupation, "combat skill"
-        exceptions = ["cat_Adventure", "cat_Occupation", "cat_CombatSkill"]
+        exceptions = ["cat_Occupation", "cat_CombatSkill"]
+        if new_node.name == "cat_Adventure":
+            return 
         if not any(new_node.name ==  i for i in exceptions):
             new_node.type = new_node.name
         # print(f"    {root.name} -> {new_node.name}")
-        return True
+        root.children.append(new_node)
+        
+        return
     
     # For level 1 skills
     elif len(new_node.req) <= 1:
@@ -103,7 +106,7 @@ def add_node(root, new_node, list=None):
         if new_node.name != "Freed Slave":
             new_node.type = root.type
         # print(f"    {root.name} -> {new_node.name}")
-        return True
+        return
 
     parent_node = find_name(root, new_node.req[1])
 
@@ -111,7 +114,7 @@ def add_node(root, new_node, list=None):
         # print(f"    {parent_node.name} -> {new_node.name}")
         parent_node.children.append(new_node)
         # new_node.type = parent_node.type
-        return True
+        return
     else:
         # print(f" x  \"{new_node.req[1]}\" not found.")
         if list:
@@ -324,20 +327,18 @@ def find_best(graph, score_list,size, k):
         remove attributes from "adventure", "freed slave", "occupation, "combat skill"
     """ 
     
-    def dp(g, score_list,size, k):
+    def dp(graph, score_list,size, k):
         """
-        - correct but made to find max score
-        - cat_nodes only sometimes included
-        - need to add discrimination
+        correct but made to find max score, cat_nodes only sometimes included
+        need to add discrimination
         """
-
-        N = k           #number of classes you can take
+        N = k       #number of classes you can take
         M = size       #total number of classes
+        children = graph
         power = score_list
-        children = g
-        
+
         # Initialize a 2D array to store the maximum value and the selected nodes
-        dp = [[(0, []) for _ in range(N+1)] for _ in range(M)]
+        dp = [[(100, []) for _ in range(N+1)] for _ in range(M)]
         def dfs(node):
             dp[node][1] = (power[node], [node]) 
             for child in children[node]:
@@ -346,7 +347,7 @@ def find_best(graph, score_list,size, k):
                     for j in range(i):
                         value = dp[node][i-j][0] + dp[child][j][0]
                         nodes = dp[node][i-j][1] + dp[child][j][1]
-                        if value > dp[node][i][0]: #discriminate here
+                        if value < dp[node][i][0]: #discriminate here
                             dp[node][i] = (value, nodes)
         dfs(0)
         # for row in dp:
@@ -358,15 +359,14 @@ def find_best(graph, score_list,size, k):
         1: cat_Occupation
         2: cat_CombatSkill
       X 3: cat_Religion
-        4: cat_Adventure
-      X 5: cat_Clan
-      X 6: cat_Personality
+      X 4: cat_Clan
+      X 5: cat_Personality
     """
     l = []
     g = []
     graph_1 = graph
-    for i in [1,2,3,4,5,6]:
-        if i == 3 or i == 5 or i == 6:
+    for i in [1,2,3,4,5]:
+        if i == 3 or i == 4 or i == 5:
             temp = []
             for z in graph[i]:
                 temp.append(z)
@@ -380,17 +380,31 @@ def find_best(graph, score_list,size, k):
 
     # modify to only check religion, clan, personality
     # still ignoring combo and instead adding other skills, need to change combo to be a req
+    solution = sys.maxsize
+    nodes = 0
+    print([nlist[i].name for i in l])
+    print("_____________________")
     for combo in product(g[0], g[1], g[2]):
         # convert num to nodes
         # s = [nlist[i].name for i in combo]
         # print(combo)    #180 total combinations
         # remove all exclusive paths such as removing pagan if req is christian
-        graph_1[0] = l + list(combo)
+        graph_1[0] = l
+        p = []
+        for i in combo:
+            graph_1[0] += graph[i]
+            p += graph[i]
+        # print([nlist[i].name for i in p])
         max_value, selected_nodes = dp(graph_1, score_list,size, k)
         print([nlist[i].name for i in selected_nodes] + [nlist[i].name for i in combo], max_value + sum([nlist[i].score for i in combo]))
-            
+        
+        if solution > max_value + sum([nlist[i].score for i in combo]):
+            solution = max_value + sum([nlist[i].score for i in combo])
+            nodes = selected_nodes + list(combo)
 
-###############################################################################################
+    return(solution,nodes)
+
+###############################aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa################################################################
 #                                   DRIVER CODE
 ###############################################################################################
 head = TreeNode("base",None,None)
@@ -453,15 +467,16 @@ for key in trait_dict:
     trait_dict[key].sort(key=lambda x: float(x.trait.split(" ", 1)[0].replace("%","")))
 
 score_li = score_nodes(trait_dict,size)
-# print_nary_tree(head, 0, True)
+print_nary_tree(head, 0, True)
 
 start_time = time.time()
-for i in range(1,5):
-    find_best(translate_to_graph(head), score_li,size, i)
-# max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 10,[1,2,3,4,5,6])
-# print("Selected nodes:", selected_nodes)
-# print("Maximum value:",[score_li[i] for i in selected_nodes],"=", max_value)
-# print("List:",[nlist[i].name for i in selected_nodes])
+# for i in range(1,5):
+#     find_best(translate_to_graph(head), score_li,size, i)
+# find_best(translate_to_graph(head), score_li,size, 2)
+max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 2)
+print("Selected nodes:", selected_nodes)
+print("Minimum value:",[score_li[i] for i in selected_nodes],"=", max_value)
+print("List:",[nlist[i].name for i in selected_nodes])
 
 # # find_best(head, 5)
 print("--- %s seconds ---" % (time.time() - start_time))
