@@ -434,7 +434,6 @@ for class_name in class_list:
     # primary_sort(node_list)
     node_list = sorted(node_list, key=lambda x: x.depth)
 
-
     #loops unadded nodes to trees until added
     for node in node_list:
         add_node(class_node, node, node_list)
@@ -455,11 +454,5 @@ for i in range(1,10):
     print("Minimum value:",[score_li[i] for i in selected_nodes],"=", max_value)
     print("List:",[nlist[i].name for i in selected_nodes])
     print("-----------------------------------------------------")
-
-# max_value, selected_nodes = find_best(translate_to_graph(head), score_li,size, 3)
-# print("Selected nodes:", selected_nodes)
-# print("Minimum value:",[score_li[i] for i in selected_nodes],"=", max_value)
-# print("List:",[nlist[i].name for i in selected_nodes])
-# print("-----------------------------------------------------")
 
 print("--- %s seconds ---" % (time.time() - start_time))
