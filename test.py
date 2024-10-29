@@ -1,10 +1,9 @@
-def dpcc(N, d):
-    if (N == 0):
-        return 0
-    ans = N+1; 
-    for i in range(0,len(d)):
-        if (N >= d[i]):
-            ans = min(ans, 1 + dpcc(N-d[i], d))
-    return ans
+import numpy as np
 
-print(dpcc(11,[1,2,5]))
+# Define the coefficients of the equations
+A = np.array([[12000, -10000, -2000], [-10000, 18300, -3600], [-2000, -3600, 6600]])
+B = np.array([-10,0,0])
+
+# Solve the system of equations
+currents = np.linalg.solve(A, B)
+print(currents)

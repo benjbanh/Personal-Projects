@@ -118,7 +118,7 @@ def add_node(root, new_node, list=None):
     else:
         # print(f" x  \"{new_node.req[1]}\" not found.")
         if list:
-            list.append(node)  
+            list.append(new_node)  
         else:
             print(f" x  \"{new_node.req[1]}\" not found.")
 
