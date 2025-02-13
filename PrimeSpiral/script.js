@@ -3,9 +3,9 @@ const ctx = canvas.getContext("2d");
 
 const width = (canvas.width = window.innerWidth);
 const height = (canvas.height = window.innerHeight);
-const squareSize = 2;
+const squareSize = 0.5;
 const squareColor = "black";
-const primeColor = "green";
+const primeColor = "white";
 
 var pos = {
   x: width / 2,
@@ -83,4 +83,4 @@ function checkPrime() {
 }
 
 setup();
-const interval = setInterval(draw, 1);
+const interval = setInterval(draw, 0);

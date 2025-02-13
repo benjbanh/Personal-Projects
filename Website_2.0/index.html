@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benjamin Banh</title>
+</head>
+<body>
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="experience.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/x-icon" href="images/red-waves.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <div class="navbar" id="navbar">
+        <a href="#header">Welcome</a>
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+
+    </div>
+
+    <div class="header" id="header">
+        <!-- Home Section -->
+        <canvas class="home-canvas"></canvas>
+        <script src="balls.js"></script>
+        
+
+        <p class="secret-text"> :0 </p>
+        <section class="home-section">
+            <div class="heading-xxlarge">Benjamin Banh</div>
+            <div class="heading-large">Aspiring Engineer</div>
+        </section>
+
+        <div class="content">
+            <a href="#experience">My Experience</a>
+        </div>
+
+        <a class="resume-button" href="images/resume.pdf" target="_blank">My Resume</a> 
+
+        <!-- Image Section -->
+        <div class="image-container">
+            <img src="images/me.jpg" alt="ME.jpg">
+        </div>
+
+        <div class="mouse_container">
+            <img src="images/mouse_click.png" alt="click here">
+        </div>
+
+        <!-- Icon Bar Section -->
+        <section class="icon-bar">
+            <a href="https://www.linkedin.com/in/benjamin-banh/" class="icon-container" target="_blank" rel="noopener noreferrer">
+                <img src="images/linkedin-icon.svg" title="LinkedIn" alt="LinkedIn">
+            </a>
+            <a href="https://github.com/benjbanh" class="icon-container" target="_blank" rel="noopener noreferrer">
+                <img src="images/github-icon.svg" title="GitHub" alt="Github">
+            </a>
+            <!-- <a href="#download-resume" class="icon-container" target="_blank" rel="noopener noreferrer">
+                <img src="images/resume-icon.svg" title="My Resume" alt="My Resume">
+            </a> -->
+        </section>
+    </div>
+
+    <div class="intro" id="about">
+        <div class="left-section">
+            <h1> About Me. </h1>
+        </div>
+        
+        <div class="right-section">
+            <div class="right-block">
+                <h3>Education</h3>
+                <p> I'm a currently an undergraduate student at Santa Clara University
+                    pursuing a Bachelors in Electrical and Computer Engineering and 
+                    expecting to graduate in June of 2026. 
+                </p>
+            </div>
+
+            <div class="right-block">
+                <h3>My Hobbies</h3>
+                <p> 
+                    I like to play the piano and harmonica in my free time. I also like 
+                    to learn game development and am in the process of designing a video
+                    game by learning player psychology and adjacent skills such as art and 
+                    composing.
+                </p>
+            </div>
+
+            <div class="right-block">
+                <h3>Skills</h3>
+                <div class="skills-list">
+                    <div class="skill-item">
+                        <i class="fa-brands fa-python"></i>
+                        <span class="skill-name">Python</span>
+                    </div>
+                    <div class="skill-item">
+                        <i class="fa-brands fa-html5"></i>  
+                        <span class="skill-name">HTML</span>
+                    </div>
+                    <div class="skill-item">
+                        <i class="fa-brands fa-css3-alt"></i>
+                        <span class="skill-name">CSS</span>
+                    </div>
+                    <div class="skill-item">
+                        <i class="fa-brands fa-js"></i>
+                        <span class="skill-name">JS</span>
+                    </div>
+                    <div class="skill-item">
+                        <i class="fa-brands fa-java"></i>
+                        <span class="skill-name">Java</span>
+                    </div>
+                    <div class="skill-item">
+                        <img src="images/c.png">
+                        <span class="skill-name">C</span>
+                    </div>
+                    <div class="skill-item">
+                        <img src="images/cpp-icon.png">
+                        <span class="skill-name">C++</span>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="experience" id="experience">
+        <div class="container-heading" >
+            <h1> My Experience </h1>
+        </div>
+
+        <div class="container">
+            <div
+                class="live-box"
+                data-title="Bouncing Balls"
+                data-description="Here is my first finished project that I started in 2020 during the pandemic.
+                    I was taking a computer science class at the time and wanted to explore 
+                    the subject and tried to make a simple physics engine with balls bouncing like 
+                    a windows DVD logo. Admittedly this took a lot longer to implement than I hoped and 
+                    I kept pushing updates for the project until I finally got it to a place I liked in 
+                    2024. Of course it could be improved, but I feel really proud of accomplishing this 
+                    as my first project."
+                data-url="images/balls_preview.png"
+            >
+                <img src="images/balls_preview.png" alt="balls_preview">
+                <h2>Bouncing Balls</h2>
+                <p>A simple physics simulation using spheres<br>
+                    <a href="BouncingBalls:index" target="_blank">See the Full Project</a>
+                </p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Prime Spiral"
+                data-description="This is my second project that I've finished which is the prime spiral. 
+                    Starting with 1 at the origin, it marks prime numbers green and non-prime
+                    numbers black, slowly spiralling out to the edges of the screen where it stops.
+                    Also known as the ulam spiral, it shows the suprising patterns of prime numbers
+                    emerging from the tapestry and shows visually that prime numbers are not as 
+                    random as they seem."
+                data-url="images/spiral_preview.png"
+            >
+                <img src="images/spiral_preview.png" alt="spiral_preview" />
+                <h2>Prime Spiral</h2>
+                <p>
+                    A replication of the Ulam Spiral on a smaller scale<br>
+                    <a href="PrimeSpiral:index" target="_blank">See the Full Project</a>
+                </p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Skill Tree Optimizer"
+                data-description="Sword and Glory is a small mobile game that I found myself incredibly attracted to
+                    with simple mechanics and a suprising depth of storytelling. This game has a typical leveling
+                    system where you are given a choice to choose a skill each from 3 different catagories
+                    at the start of a run and gain a new skill every level. Despite that, I thought
+                    that there must be an optimal way for gaining skills to maximize my progression.
+                    So this project came to be. I asked some friends for help with the problem and 
+                    it somehow became one of the questions for my school's competitive programming competition.
+                    This project spanned the course of a year and still remains as one of my favorites and 
+                    helped me know so many great people.
+
+                    The project was then constructed into a form with a dynamic scoring system that 
+                    will predict the best build depending on your playstyle and preferences."
+                data-url="images/skilltree.jpg"
+            >
+                <img src="images/S&G.png" alt="Video Thumbnail" />
+                <h2>Skill Tree Optimizer</h2>
+                <p>
+                    An algorithm that finds the best value solution given 
+                    complete information of options <br>
+                    <a href="SkillTree:index" target="_blank">See the Full Project</a>
+
+                </p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Charity Evaluator"
+                data-description="This was a hackathon project where our team analyzed how how 
+                    efficient each nonprofit charity is in America through an 
+                    analysis of the IRS Form 990s by balancing their program 
+                    expenses over total expenses. The goal of our project was 
+                    to determine which charities were best for people to donate 
+                    to do the most good with the same amount of money."
+                data-url="images/IRS.png"
+            >
+                <img src="images/charity.jpg" alt="Video Thumbnail" />
+                <h2>Charity Evaluator</h2>
+                <p>
+                    Evaluates the most efficient charity through IRS Forms
+                    <a href="https://github.com/cyanide1209/hack" target="_blank">Link to Github</a>
+                </p>
+            </div>
+            
+            <div
+                class="live-box"
+                data-title="Social Interaction Simulator Game"
+                data-description="This was a hackathon project where our team 
+                    built an AI conversation partner with the goal of helping those 
+                    who have been impacted socially by the pandemic or anyone who 
+                    wishes to practice having a conversation without the pressure of 
+                    judgement of the outside world. The companion would ask a variety 
+                    of questions and would then score your response as well as provide 
+                    constructive feedback to the user. This was to provide a visible 
+                    metric for which the user can use to tell if they are improving 
+                    opposed to having the user guess their progress or the AI's intention 
+                    through conversation. To improve the learning curve for the app, we 
+                    decided to also include a helper that would guide you in your 
+                    conversations as well as a fun background and partner to keep users 
+                    engaged and lower the tension in the activity."
+                data-url="images/pixel_dude.png"
+            >
+                <img src="images/SocialSim.png" alt="Video Thumbnail" />
+                <h2 style="pointer-events: all;">Social Interaction Simulator Game</h2>
+                <p>
+                    AI friend to practice conversations<br>
+                    <a href="https://github.com/suncycles/h4hsocialsim" target="_blank">Link to Github</a>
+                </p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Video 4 Title"
+                data-description="This was a project done by a family friend who wanted to 
+                make a website dedicated to his love for astronomy and he needed help with 
+                front end web design built upon the Django framework. I started to learn 
+                more about teamwork in a long-term project as well as learning varying frameworks 
+                essential for front-end development. Working on this website was the inspiration 
+                of my very own website(this) and I hope to continue designing such products.
+                Check him out at https://upinthesky.net/"
+                data-url="images/galaxy.png"
+            >
+                <img src="images/space.jpg" alt="Video Thumbnail" />
+                <h2>Universe3D</h2>
+                <p>Helped in the redesign of the front end of family friend's website</p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Video 4 Title"
+                data-description="Currently I am part of the board for the IEEE Student 
+                    Chapter for Santa Clara Region 6 as the Public Relations member of 
+                    the student led board. Currently my responsibilities is to host 
+                    events alongside other board members, communicating with the Santa 
+                    Clara IEEE  and maintain good club relations with other clubs. I 
+                    started this position in the Spring of 2023 and hope to help improve 
+                    the club into being something bigger than it is now."
+                data-url="images/IEEE_board.png"
+            >
+                <img src="images/IEEE_logo.svg.png" alt="Video Thumbnail" />
+                <h2>IEEE Board Member</h2>
+                <p>Board Member for Santa Clara University's Student Chapter</p>
+            </div>
+            <div
+                class="live-box"
+                data-title="Media Services"
+                data-description="Media Services is Santa Clara University audio 
+                    visual support team formed with a majority of student staff. We 
+                    hold the responsibility of setting up, operating, and maintaining 
+                    equipment for varying events and conferences for all groups on campus. 
+                    Due to the variety of tasks we are made to perform and support, I 
+                    have learned several Audio Visual Skills such as troubleshooting 
+                    problems remotely, working with several recording and acoustic devices, 
+                    and inspecting AV equipment to maintain its condition. Throughout this 
+                    job I have worked closely with several event planners, professors, and 
+                    other team members to ensure the best event they can have."
+                data-url="images/placeholder.jpg"
+            >
+                <img src="images/MS.jpg" alt="Video Thumbnail" />
+                <h2>Media Services</h2>
+                <p>Santa Clara University's Tech and Audio Visual Support</p>
+            </div>
+        </div>
+
+        <!-- Popup with distinct iframe and text sections -->
+        <div id="popup" class="popup">
+            <div class="popup-content">
+                <span class="close">&times;</span>
+
+                <!-- Split popup into left (iframe) and right (text) -->
+                <div class="popup-left">
+                    <div class="popup-iframe" id="iframe-container">
+                        <!-- The iframe will be injected here when the popup is clicked -->
+                    </div>
+                </div>
+
+                <div class="popup-right">
+                    <div class="popup-text">
+                        <h2>Detailed Explanation</h2>
+                        <p>
+                            This is a detailed explanation that appears on the right side
+                            of the popup. You can add any text or content here to explain
+                            the content in the video.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-bottom">
+            <p> @2024 Benjamin Banh</p>
+            <p> Email me at benjbanh@gmail.com</p>
+        </div>
+    </footer>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
